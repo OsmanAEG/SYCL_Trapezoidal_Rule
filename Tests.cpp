@@ -27,7 +27,24 @@ auto test2(){
   std::cout << integral << std::endl;
 }
 
+// TEST 3 - 1D - GPU ///////////////////////
+template<typename Sycl_Queue>
+auto test3(Sycl_Queue Q){
+  auto function = [](const double& x){
+    return x*x;
+  };
+
+  auto integral = sycl_trapezoidal_integration_1D(Q, function, 0.0, 1.0, 10000);
+  std::cout << integral << std::endl;
+}
+
 int main(){
+  sycl::queue Q{sycl::gpu_selector_v};
+  std::cout << "DEVICE: "
+            << Q.get_device().get_info<sycl::info::device::name>()
+            << "\n";
   test1();
   test2();
+  test3(Q);
+  return 0;
 }

@@ -186,5 +186,36 @@ auto sycl_trapezoidal_integration_3D(Sycl_Queue Q,
   return get_result_host[0];
 }
 
+// Trapezoidal Integration Handler
+template<int GPU_dim, typename Sycl_Queue, typename Function_type, typename Scalar_type, typename... Arguments>
+auto trapezoidal_integration_handler(Sycl_Queue Q,
+                                     const Function_type& function,
+                                     const Scalar_type& a_x,
+                                     const Scalar_type& b_x,
+                                     const size_t& M,
+                                     const Arguments&... arguments){
+
+  static_assert(sizeof...(arguments)%3 == 0, "ERROR: Incorrect number of arguments passed to the handler!");
+
+  static_assert(GPU_dim < 4, "ERROR: Incorrect GPU dimensions!");
+
+  const auto dim = sizeof...(arguments)/3 + 1;
+
+  static_assert(GPU_dim <= dim, "ERROR: GPU dimension cannot be greater than problem dimension!");
+
+  if constexpr(GPU_dim == 0){
+    return trapezoidal_integration(function, a_x, b_x, M, arguments...);
+  }
+  else if constexpr(GPU_dim == 1){
+    return sycl_trapezoidal_integration_1D(Q, function, a_x, b_x, M, arguments...);
+  }
+  else if constexpr(GPU_dim == 2){
+    return sycl_trapezoidal_integration_2D(Q, function, a_x, b_x, M, arguments...);
+  }
+  else{
+    return sycl_trapezoidal_integration_3D(Q, function, a_x, b_x, M, arguments...);
+  }
+}
+
 
 

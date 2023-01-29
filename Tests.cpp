@@ -13,7 +13,7 @@ auto test1(){
     return x*x;
   };
 
-  auto integral = trapezoidal_integration_1D(function, 0.0, 1.0, 10000);
+  auto integral = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, 10000);
   std::cout << integral << std::endl;
 }
 
@@ -23,7 +23,7 @@ auto test2(){
     return x*x + y*y;
   };
 
-  auto integral = trapezoidal_integration(function, 0.0, 1.0, 10000, 0.0, 3.0, 10000);
+  auto integral = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, 10000, 0.0, 3.0, 10000);
   std::cout << integral << std::endl;
 }
 
@@ -33,7 +33,7 @@ auto test3(){
     return x*x + y*y + z*z;
   };
 
-  auto integral = trapezoidal_integration(function, 0.0, 1.0, 100, 0.0, 3.0, 100, -2.0, 8.0, 100);
+  auto integral = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, 100, 0.0, 3.0, 100, -2.0, 8.0, 100);
   std::cout << integral << std::endl;
 }
 
@@ -44,7 +44,7 @@ auto test4(Sycl_Queue Q){
     return x*x;
   };
 
-  auto integral = sycl_trapezoidal_integration_1D(Q, function, 0.0, 1.0, 10000);
+  auto integral = trapezoidal_integration_handler<1>(Q, function, 0.0, 1.0, 10000);
   std::cout << integral << std::endl;
 }
 
@@ -55,7 +55,7 @@ auto test5(Sycl_Queue Q){
     return x*x + y*y;
   };
 
-  auto integral = sycl_trapezoidal_integration_2D(Q, function, 0.0, 1.0, 10000, 0.0, 3.0, 10000);
+  auto integral = trapezoidal_integration_handler<2>(Q, function, 0.0, 1.0, 10000, 0.0, 3.0, 10000);
   std::cout << integral << std::endl;
 }
 
@@ -66,7 +66,7 @@ auto test6(Sycl_Queue Q){
     return x*x + y*y + z*z;
   };
 
-  auto integral = sycl_trapezoidal_integration_3D(Q, function, 0.0, 1.0, 100, 0.0, 3.0, 100, -2.0, 8.0, 100);
+  auto integral = trapezoidal_integration_handler<3>(Q, function, 0.0, 1.0, 100, 0.0, 3.0, 100, -2.0, 8.0, 100);
   std::cout << integral << std::endl;
 }
 
@@ -75,11 +75,11 @@ int main(){
   std::cout << "DEVICE: "
             << Q.get_device().get_info<sycl::info::device::name>()
             << "\n";
-  //test1();
-  //test2();
-  //test3();
-  //test4(Q);
-  //test5(Q);
+  test1();
+  test2();
+  test3();
+  test4(Q);
+  test5(Q);
   test6(Q);
   return 0;
 }

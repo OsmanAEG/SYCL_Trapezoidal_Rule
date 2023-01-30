@@ -7,67 +7,97 @@
 // Including local header files
 #include "Trapezoidal_Integration_Handler.h"
 
-// TEST 1 - 1D - CPU ///////////////////////
-auto test1(){
-  auto function = [](const double& x){
-    return x*x;
+auto cpu_tests(){
+  constexpr auto tolerance = 1.0e-3;
+
+  auto check = [&](double result, double answer){
+    assert(fabs((result-answer)/answer) < tolerance);
   };
 
-  auto integral = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, 10000);
-  std::cout << integral << std::endl;
-}
+  auto test_1D = [&](){
+    auto function = [](const double& x){
+      return x*x;
+    };
 
-// TEST 2 - 2D - CPU ///////////////////////
-auto test2(){
-  auto function = [](const double& x, const double& y){
-    return x*x + y*y;
+    const int N = 1000;
+    const auto answer = 1.0/3.0;
+    const auto tolerance = 1.0e-3;
+    const auto result = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, N);
+    check(result, answer);
   };
 
-  auto integral = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, 10000, 0.0, 3.0, 10000);
-  std::cout << integral << std::endl;
-}
+  auto test_2D = [&](){
+    auto function = [](const double& x, const double& y){
+      return x*x + y*y;
+    };
 
-// TEST 3 - 3D - CPU ///////////////////////
-auto test3(){
-  auto function = [](const double& x, const double& y, const double& z){
-    return x*x + y*y + z*z;
+    const int N = 1000;
+    const auto answer = 10.0;
+    const auto tolerance = 1.0e-3;
+    const auto result = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, N, 0.0, 3.0, N);
+    check(result, answer);
   };
 
-  auto integral = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, 100, 0.0, 3.0, 100, -2.0, 8.0, 100);
-  std::cout << integral << std::endl;
+  auto test_3D = [&](){
+    auto function = [](const double& x, const double& y, const double& z){
+      return x*x + y*y + z*z;
+    };
+
+    const int N = 1000;
+    const auto answer = 620.0;
+    const auto tolerance = 1.0e-3;
+    const auto result = trapezoidal_integration_handler<0>(0, function, 0.0, 1.0, N, 0.0, 3.0, N, -2.0, 8.0, N);
+    check(result, answer);
+  };
+
+  std::cout << "The CPU Tests Passed!" << std::endl;
 }
 
-// TEST 4 - 1D - GPU ///////////////////////
 template<typename Sycl_Queue>
-auto test4(Sycl_Queue Q){
-  auto function = [](const double& x){
-    return x*x;
+auto gpu_tests(Sycl_Queue Q){
+  constexpr auto tolerance = 1.0e-3;
+
+  auto check = [&](double result, double answer){
+    assert(fabs((result-answer)/answer) < tolerance);
   };
 
-  auto integral = trapezoidal_integration_handler<1>(Q, function, 0.0, 1.0, 10000);
-  std::cout << integral << std::endl;
-}
+  auto test_1D = [&](){
+    auto function = [](const double& x){
+      return x*x;
+    };
 
-// TEST 5 - 2D - GPU ///////////////////////
-template<typename Sycl_Queue>
-auto test5(Sycl_Queue Q){
-  auto function = [](const double& x, const double& y){
-    return x*x + y*y;
+    const int N = 1000;
+    const auto answer = 1.0/3.0;
+    const auto tolerance = 1.0e-3;
+    const auto result = trapezoidal_integration_handler<1>(Q, function, 0.0, 1.0, N);
+    check(result, answer);
   };
 
-  auto integral = trapezoidal_integration_handler<2>(Q, function, 0.0, 1.0, 10000, 0.0, 3.0, 10000);
-  std::cout << integral << std::endl;
-}
+  auto test_2D = [&](){
+    auto function = [](const double& x, const double& y){
+      return x*x + y*y;
+    };
 
-// TEST 6 - 3D - GPU ///////////////////////
-template<typename Sycl_Queue>
-auto test6(Sycl_Queue Q){
-  auto function = [](const double& x, const double& y, const double& z){
-    return x*x + y*y + z*z;
+    const int N = 1000;
+    const auto answer = 10.0;
+    const auto tolerance = 1.0e-3;
+    const auto result = trapezoidal_integration_handler<2>(Q, function, 0.0, 1.0, N, 0.0, 3.0, N);
+    check(result, answer);
   };
 
-  auto integral = trapezoidal_integration_handler<3>(Q, function, 0.0, 1.0, 100, 0.0, 3.0, 100, -2.0, 8.0, 100);
-  std::cout << integral << std::endl;
+  auto test_3D = [&](){
+    auto function = [](const double& x, const double& y, const double& z){
+      return x*x + y*y + z*z;
+    };
+
+    const int N = 1000;
+    const auto answer = 620.0;
+    const auto tolerance = 1.0e-3;
+    const auto result = trapezoidal_integration_handler<0>(Q, function, 0.0, 1.0, N, 0.0, 3.0, N, -2.0, 8.0, N);
+    check(result, answer);
+  };
+
+  std::cout << "The GPU Tests Passed!" << std::endl;
 }
 
 int main(){
@@ -75,11 +105,9 @@ int main(){
   std::cout << "DEVICE: "
             << Q.get_device().get_info<sycl::info::device::name>()
             << "\n";
-  test1();
-  test2();
-  test3();
-  test4(Q);
-  test5(Q);
-  test6(Q);
+
+  cpu_tests();
+  gpu_tests(Q);
+
   return 0;
 }

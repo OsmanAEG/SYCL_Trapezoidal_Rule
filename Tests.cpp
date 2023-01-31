@@ -93,7 +93,7 @@ auto gpu_tests(Sycl_Queue Q){
     const int N = 1000;
     const auto answer = 620.0;
     const auto tolerance = 1.0e-3;
-    const auto result = trapezoidal_integration_handler<0>(Q, function, 0.0, 1.0, N, 0.0, 3.0, N, -2.0, 8.0, N);
+    const auto result = trapezoidal_integration_handler<3>(Q, function, 0.0, 1.0, N, 0.0, 3.0, N, -2.0, 8.0, N);
     check(result, answer);
   };
 

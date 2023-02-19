@@ -68,7 +68,22 @@ int main(){
 
   // evaluating the integral
   const auto result_1 = trapezoidal_integration_handler<1>(Q, function_1, theta_1, theta_2, N);
+  const auto result_2 = trapezoidal_integration_handler<1>(Q, function_2, theta_1, theta_2, N);
+  const auto result_3 = trapezoidal_integration_handler<1>(Q, function_3, theta_1, theta_2, N);
+  const auto result_4 = trapezoidal_integration_handler<1>(Q, function_4, theta_1, theta_2, N);
+  const auto result_5 = trapezoidal_integration_handler<1>(Q, function_5, theta_1, theta_2, N);
+  const auto result_6 = trapezoidal_integration_handler<1>(Q, function_6, theta_1, theta_2, N);
+  const auto result_7 = trapezoidal_integration_handler<1>(Q, function_7, theta_1, theta_2, N);
+  const auto result_8 = trapezoidal_integration_handler<1>(Q, function_8, theta_1, theta_2, N);
+
   std::cout << "Result 1: " << result_1 << std::endl;
+  std::cout << "Result 2: " << result_2 << std::endl;
+  std::cout << "Result 3: " << result_3 << std::endl;
+  std::cout << "Result 4: " << result_4 << std::endl;
+  std::cout << "Result 5: " << result_5 << std::endl;
+  std::cout << "Result 6: " << result_6 << std::endl;
+  std::cout << "Result 7: " << result_7 << std::endl;
+  std::cout << "Result 8: " << result_8 << std::endl;
 
   return 0;
 }

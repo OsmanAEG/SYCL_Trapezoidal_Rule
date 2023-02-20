@@ -1,5 +1,9 @@
 // Standard C++ include items
 #include <iostream>
+#include <cmath>
+
+// Boost library
+#include <boost/math/special_functions/bessel.hpp>
 
 // Including the SYCL library
 #include <CL/sycl.hpp>
@@ -17,8 +21,8 @@ int main(){
   // defining some variables
   const double theta_1 = 0.0;
   const double theta_2 = 2.0*pi;
-  const double B = 2.3;
-  const double u = 3.5;
+  const double B = 1.78/(2*101325.0);
+  const double u = 300;
 
   // first function
   const auto function_1 = [=](const double &theta){
@@ -76,7 +80,14 @@ int main(){
   const auto result_7 = trapezoidal_integration_handler<1>(Q, function_7, theta_1, theta_2, N);
   const auto result_8 = trapezoidal_integration_handler<1>(Q, function_8, theta_1, theta_2, N);
 
-  std::cout << "Result 1: " << result_1 << std::endl;
+  // bessel function
+  int order0 = 0;
+  int order1 = 1;
+
+  const auto bessel_1 = exp(-u*u*B/2.0)*pi*(boost::math::cyl_bessel_i(order0, -u*u*B/2.0)
+                            + boost::math::cyl_bessel_i(order1, -u*u*B/2.0));
+
+  std::cout << "Result 1: " << result_1 << " and Bessel 1: " << bessel_1 << std::endl;
   std::cout << "Result 2: " << result_2 << std::endl;
   std::cout << "Result 3: " << result_3 << std::endl;
   std::cout << "Result 4: " << result_4 << std::endl;

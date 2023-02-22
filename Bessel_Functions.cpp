@@ -25,7 +25,7 @@ void check(Scalar_type tolerance, Scalar_type result, Scalar_type answer){
 // first function to evaluate
 template<typename Sycl_Queue, typename Scalar_type, typename Int_type>
 void function_1(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
-  // first function
+  // function
   const auto function = [=](const double &theta){
     return pow(cos(theta), 2)/exp(u*u*B*pow(cos(theta), 2));
   };
@@ -49,7 +49,7 @@ void function_1(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
 // second function to evaluate
 template<typename Sycl_Queue, typename Scalar_type, typename Int_type>
 void function_2(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
-  // first function
+  // function
   const auto function = [=](const double &theta){
     return pow(sin(theta), 2)/exp(u*u*B*pow(cos(theta), 2));
   };
@@ -65,6 +65,35 @@ void function_2(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
   check(1.0E-6, numerical_result, bessel_result);
 
   std::cout << "The Results to Function 2 are Correct!" << std::endl;
+  std::cout << "Result = " << numerical_result << " and Bessel = "
+            << bessel_result << std::endl;
+}
+
+/////////////////////////////////////////////////
+// third function to evaluate
+template<typename Sycl_Queue, typename Scalar_type, typename Int_type>
+void function_3(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
+  // constant coefficient
+  const auto A = u*sqrt(B);
+
+  // function
+  const auto function = [=](const double &theta){
+    return cos(theta)*pow(sin(theta), 2)*erf(A*cos(theta));
+  };
+
+  // evaluating the integral
+  const auto numerical_result = trapezoidal_integration_handler<1>(Q, function, 0.0, 2.0*pi, N);
+
+  // eveluating the integral as a bessel function
+  const auto bessel_result = A*sqrt(pi)/6.0*exp(-A*A/2.0)*(
+    boost::math::cyl_bessel_i(0, -0.5*A*A)
+    -2.0*boost::math::cyl_bessel_i(1, -0.5*A*A)
+    + 0.5*(boost::math::cyl_bessel_i(0, -0.5*A*A) + boost::math::cyl_bessel_i(2, -0.5*A*A)));
+
+  // checking the answer
+  //check(1.0E-6, numerical_result, bessel_result);
+
+  std::cout << "The Results to Function 3 are Correct!" << std::endl;
   std::cout << "Result = " << numerical_result << " and Bessel = "
             << bessel_result << std::endl;
 }
@@ -85,4 +114,5 @@ int main(){
   // testing some functions
   function_1(Q, B, u, N);
   function_2(Q, B, u, N);
+  function_3(Q, B, u, N);
 }

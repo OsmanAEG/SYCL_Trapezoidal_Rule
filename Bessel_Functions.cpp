@@ -87,13 +87,72 @@ void function_3(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
   // eveluating the integral as a bessel function
   const auto bessel_result = A*sqrt(pi)/6.0*exp(-A*A/2.0)*(
     2.0*boost::math::cyl_bessel_i(0, -0.5*A*A)
-    -4.0*boost::math::cyl_bessel_i(1, -0.5*A*A)
+    - 4.0*boost::math::cyl_bessel_i(1, -0.5*A*A)
     + (boost::math::cyl_bessel_i(0, -0.5*A*A) + boost::math::cyl_bessel_i(2, -0.5*A*A)));
 
   // checking the answer
   check(1.0E-6, numerical_result, bessel_result);
 
   std::cout << "The Results to Function 3 are Correct!" << std::endl;
+  std::cout << "Result = " << numerical_result << " and Bessel = "
+            << bessel_result << std::endl;
+}
+
+/////////////////////////////////////////////////
+// fourth function to evaluate
+template<typename Sycl_Queue, typename Scalar_type, typename Int_type>
+void function_4(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
+  // constant coefficient
+  const auto A = u*sqrt(B);
+
+  // function
+  const auto function = [=](const double &theta){
+    return pow(cos(theta), 3)*erf(A*cos(theta));
+  };
+
+  // evaluating the integral
+  const auto numerical_result = trapezoidal_integration_handler<1>(Q, function, 0.0, 2.0*pi, N);
+
+  // eveluating the integral as a bessel function
+  const auto bessel_result = 2.0*A/sqrt(pi)*exp(-u*u*B/2.0)*pi*(
+    boost::math::cyl_bessel_i(0, -u*u*B/2.0)
+    - boost::math::cyl_bessel_i(1, -u*u*B/2.0)) -A*sqrt(pi)/6.0*exp(-A*A/2.0)*(
+    2.0*boost::math::cyl_bessel_i(0, -0.5*A*A)
+    - 4.0*boost::math::cyl_bessel_i(1, -0.5*A*A)
+    + (boost::math::cyl_bessel_i(0, -0.5*A*A) + boost::math::cyl_bessel_i(2, -0.5*A*A)));
+
+  // checking the answer
+  check(1.0E-6, numerical_result, bessel_result);
+
+  std::cout << "The Results to Function 4 are Correct!" << std::endl;
+  std::cout << "Result = " << numerical_result << " and Bessel = "
+            << bessel_result << std::endl;
+}
+
+/////////////////////////////////////////////////
+// fifth function to evaluate
+template<typename Sycl_Queue, typename Scalar_type, typename Int_type>
+void function_5(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
+  // constant coefficient
+  const auto A = u*sqrt(B);
+
+  // function
+  const auto function = [=](const double &theta){
+    return cos(theta)*erf(A*cos(theta));
+  };
+
+  // evaluating the integral
+  const auto numerical_result = trapezoidal_integration_handler<1>(Q, function, 0.0, 2.0*pi, N);
+
+  // eveluating the integral as a bessel function
+  const auto bessel_result = 2.0*A/sqrt(pi)*exp(-u*u*B/2.0)*pi*(
+    boost::math::cyl_bessel_i(0, -u*u*B/2.0)
+    - boost::math::cyl_bessel_i(1, -u*u*B/2.0));
+
+  // checking the answer
+  check(1.0E-6, numerical_result, bessel_result);
+
+  std::cout << "The Results to Function 5 are Correct!" << std::endl;
   std::cout << "Result = " << numerical_result << " and Bessel = "
             << bessel_result << std::endl;
 }
@@ -115,4 +174,6 @@ int main(){
   function_1(Q, B, u, N);
   function_2(Q, B, u, N);
   function_3(Q, B, u, N);
+  function_4(Q, B, u, N);
+  function_5(Q, B, u, N);
 }

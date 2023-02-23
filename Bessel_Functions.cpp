@@ -86,12 +86,12 @@ void function_3(Sycl_Queue Q, Scalar_type B, Scalar_type u, Int_type N){
 
   // eveluating the integral as a bessel function
   const auto bessel_result = A*sqrt(pi)/6.0*exp(-A*A/2.0)*(
-    boost::math::cyl_bessel_i(0, -0.5*A*A)
-    -2.0*boost::math::cyl_bessel_i(1, -0.5*A*A)
-    + 0.5*(boost::math::cyl_bessel_i(0, -0.5*A*A) + boost::math::cyl_bessel_i(2, -0.5*A*A)));
+    2.0*boost::math::cyl_bessel_i(0, -0.5*A*A)
+    -4.0*boost::math::cyl_bessel_i(1, -0.5*A*A)
+    + (boost::math::cyl_bessel_i(0, -0.5*A*A) + boost::math::cyl_bessel_i(2, -0.5*A*A)));
 
   // checking the answer
-  //check(1.0E-6, numerical_result, bessel_result);
+  check(1.0E-6, numerical_result, bessel_result);
 
   std::cout << "The Results to Function 3 are Correct!" << std::endl;
   std::cout << "Result = " << numerical_result << " and Bessel = "

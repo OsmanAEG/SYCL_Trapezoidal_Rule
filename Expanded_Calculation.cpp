@@ -167,23 +167,24 @@ auto analytical_result(Scalar_type B, Scalar_type u){
 // result calculated via analytical relations
 template<typename Vector_type, typename Scalar_type>
 auto coefficient_calculation(Vector_type results, Scalar_type n, Scalar_type m,
-                             Scalar_type u, Scalar_type B, Scalar_type B_h, Scalar_type a){
+                             Scalar_type u, Scalar_type B, Scalar_type B_h, 
+                             Scalar_type a, Scalar_type R, Scalar_type w){
   // constant coefficient
   Vector_type coefficients(14);
   coefficients[0]  = n*m*u/(sqrt(B*pi))*(1-0.5*a);
-  coefficients[1]  = 1.0;
-  coefficients[2]  = 1.0;
-  coefficients[3]  = 1.0;
-  coefficients[4]  = 1.0;
-  coefficients[5]  = 1.0;
-  coefficients[6]  = 1.0;
-  coefficients[7]  = 1.0;
-  coefficients[8]  = 1.0;
-  coefficients[9]  = 1.0;
-  coefficients[10] = 1.0;
-  coefficients[11] = 1.0;
-  coefficients[12] = 1.0;
-  coefficients[13] = 1.0;
+  coefficients[1]  = -n*m*a/(4.0*sqrt(B*B_h));
+  coefficients[2]  = n*m*u*u*(1.0-a/2.0);
+  coefficients[3]  = -n*m*u*u*(1.0-a/2.0);
+  coefficients[4]  = -n*m*a*sqrt(pi)*u/(4.0*sqrt(B_h));
+  coefficients[5]  = n*m*sqrt(pi)*u*a/(4.0*sqrt(B_h));
+  coefficients[6]  = n*m/(2.0*B)*(1.0-a/2.0);
+  coefficients[7]  = -n*m/(2.0*B)*(1.0-a/2.0);
+  coefficients[8]  = n*m*a*u/(2.0*sqrt(B*pi));
+  coefficients[9]  = n*m*u*u*a/2.0;
+  coefficients[10] = -n*m*u*u*a/2.0;
+  coefficients[11] = -n*m*a*R*w/(2.0*sqrt(B*pi));
+  coefficients[12] = -n*m*u*a*R*w/2.0;
+  coefficients[13] = n*m*u*a*R*w/2.0;
 
   auto sum = 0.0;
 
@@ -206,13 +207,20 @@ int main(){
 
   // defining some variables
   const double B = 8.78E-6;
+  const double B_h = 9.87E-6;
+  const double n = 0.178;
   const double u = 300;
+  const double w = 320;
+  const double R = 1.0;
+  const double m = 1.0;
+  const double a = 1.0;
 
   const auto num_results = numerical_result(Q, B, u, N);
   const auto ana_results = analytical_result(B, u);
 
-  const auto num_sum = coefficient_calculation(num_results);
-  const auto ana_sum = coefficient_calculation(ana_results);
+  const auto num_sum = coefficient_calculation(num_results, n, m, u, B, B_h, a, R, w);
+  const auto ana_sum = coefficient_calculation(ana_results, n, m, u, B, B_h, a, R, w);
+  check(1.0E-6, num_sum, ana_sum);
 
   std::cout << "numerical: " << num_sum << " and analytical: " << ana_sum << std::endl;
   return 0;

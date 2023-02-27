@@ -22,6 +22,52 @@ void check(Scalar_type tolerance, Scalar_type result, Scalar_type answer){
 }
 
 /////////////////////////////////////////////////
+// result calculated via numerical relations
+template< typename Sycl_Queue, typename Scalar_type, typename Int_type>
+auto numerical_result(Sycl_Queue Q, Int_type N, Int_type infty,
+                      Scalar_type n, Scalar_type m, Scalar_type u, Scalar_type B,
+                      Scalar_type B_h, Scalar_type a, Scalar_type R, Scalar_type w){
+
+  const auto function = [=](const double& x, const double& y,
+                            const double& z, const double& theta){
+
+    const auto f  = n*pow(B/pi, 1.5)*exp(-B*(pow(x+u*cos(theta), 2.0)
+                                            + pow(y-u*sin(theta), 2.0) + pow(z, 2.0)));
+
+    const auto P = m*(2.0-a)*x*x*f;
+    const auto T = m*a*x*y*f;
+    return -P*cos(theta) + T*sin(theta);
+  };
+
+  const auto functionh = [=](const double& x, const double& y,
+                            const double& z, const double& theta){
+    const auto n_h = sqrt(B_h/B)*n*exp(-u*u*B*cos(theta)*cos(theta))
+                      + n*(sqrt(B_h)*u*cos(theta)*sqrt(pi)*(erf(sqrt(B)*cos(theta)*u)-1.0));
+
+    const auto fh = n_h*pow(B_h/pi, 1.5)*exp(-B_h*(pow(x, 2.0) + pow(y-w*R, 2.0) + pow(z, 2.0)));
+
+    const auto P = m*a*x*x*fh;
+    const auto T = m*a*x*y*fh;
+    return -P*cos(theta) + T*sin(theta);
+  };
+
+  const auto result  = trapezoidal_integration_handler<3>(Q, function,
+                                                           0.0, infty, N,
+                                                          -infty, infty, N,
+                                                          -infty, infty, N,
+                                                           0.0, 2.0*pi, N);
+
+  const auto resulth  = trapezoidal_integration_handler<3>(Q, functionh,
+                                                          -infty, 0.0, N,
+                                                          -infty, infty, N,
+                                                          -infty, infty, N,
+                                                           0.0, 2.0*pi, N);
+
+  const auto results = result + resulth;
+  return results;
+}
+
+/////////////////////////////////////////////////
 // result calculated via analytical relations
 template<typename Scalar_type>
 auto analytical_result(Scalar_type B, Scalar_type u){
@@ -105,7 +151,10 @@ int main(){
             << "\n";
 
   // number of integration segments
-  const double N = 5000;
+  const double N = 400;
+
+  // integration range
+  const double infty = 2000;
 
   // properties
   const double R   = 1.0;
@@ -123,9 +172,13 @@ int main(){
   const double a = 1.0;
 
   const auto analytical = analytical_result(B, u);
-  const auto D          = coefficient_calculation(analytical, n, m, u, B, B_h, a, R, w);
 
-  const auto cd = D/(rho*u*u*R);
+  const auto D_analytical = coefficient_calculation(analytical, n, m, u, B, B_h, a, R, w);
+  const auto D_numerical  = numerical_result(Q, N, infty, n, m, u, B, B_h, a, R, w);
 
-  std::cout << cd << std::endl;
+  const auto cd_analytical = D_analytical/(rho*u*u*R);
+  const auto cd_numerical  = D_numerical/(rho*u*u*R);
+
+  std::cout << cd_analytical << std::endl;
+  std::cout << cd_numerical << std::endl;
 }

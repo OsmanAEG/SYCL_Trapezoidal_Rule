@@ -42,16 +42,19 @@ auto numerical_result(Sycl_Queue Q, Int_type N, Int_type infty,
   const auto functionh = [=](const double& x, const double& y,
                             const double& z, const double& theta){
 
-    const auto num = 4.0*B*(exp(-u*u*B*pow(cos(theta), 2)) + u*cos(theta)*sqrt(pi*B)*(erf(u*sqrt(B)*cos(theta))-1.0));
+    /*const auto num = 4.0*B*(exp(-u*u*B*pow(cos(theta), 2)) + u*cos(theta)*sqrt(pi*B)*(erf(u*sqrt(B)*cos(theta))-1.0));
 
-    const auto den = (2.0*w*w*R*R*B - 2.0*B*u*u - 4.0)*exp(-u*u*B*pow(cos(theta), 2)) + 2.0*cos(theta)*sqrt(pi)*u*((R*R*w*w - u*u)*pow(B, 1.5) - 2.5*sqrt(B))*(erf(u*sqrt(B)*cos(theta))-1.0);
+    const auto den = (2.0*w*w*R*R*B - 2.0*B*u*u - 4.0)*exp(-u*u*B*pow(cos(theta), 2)) + 2.0*cos(theta)*sqrt(pi)*u*(erf(u*sqrt(B)*cos(theta))-1.0)*((R*R*w*w - u*u)*pow(B, 1.5) - 2.5*sqrt(B));
+
+    auto B_hn = -num/den;*/
+
+    const auto num = 4.0*B*(exp(-u*u*B*pow(cos(theta), 2)) + u*cos(theta)*sqrt(pi*B)*erf(u*sqrt(B)*cos(theta)));
+
+    const auto den = (2.0*w*w*R*R*B - 2.0*B*u*u - 4.0)*exp(-u*u*B*pow(cos(theta), 2)) + 2.0*cos(theta)*sqrt(pi)*u*erf(u*sqrt(B)*cos(theta))*((R*R*w*w - u*u)*pow(B, 1.5) - 2.5*sqrt(B));
 
     auto B_hn = -num/den;
 
     const auto n_h = n*sqrt(B_hn/B)*(exp(-u*u*B*pow(cos(theta), 2)) + sqrt(pi*B)*u*cos(theta)*(erf(sqrt(B)*cos(theta)*u)-1.0));
-
-    const auto RHS = n/(2.0*pi*B*B)*((u*u*pow(B, 1.5) + 2.0*sqrt(B))*exp(-B*pow(cos(theta), 2)*u*u))
-                      + (u*u*B + 2.5)*(cos(theta)*B*u*sqrt(pi))*(erf(u*sqrt(B)*cos(theta))-1.0);
 
     const auto f = n_h*pow(B_hn/pi, 1.5)*exp(-B_hn*(pow(x, 2.0) + pow(y-w*R, 2.0) + pow(z, 2.0)));
 

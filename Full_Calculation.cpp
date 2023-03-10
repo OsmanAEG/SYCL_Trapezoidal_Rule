@@ -42,21 +42,9 @@ auto numerical_result(Sycl_Queue Q, Int_type N, Int_type infty,
   const auto functionh = [=](const double& x, const double& y,
                             const double& z, const double& theta){
 
-    /*const auto num = 4.0*B*(exp(-u*u*B*pow(cos(theta), 2)) + u*cos(theta)*sqrt(pi*B)*(erf(u*sqrt(B)*cos(theta))-1.0));
+    const auto n_h = n*sqrt(B_h/B)*(exp(-u*u*B*pow(cos(theta), 2)) + sqrt(pi*B)*u*cos(theta)*(erf(sqrt(B)*cos(theta)*u)-1.0));
 
-    const auto den = (2.0*w*w*R*R*B - 2.0*B*u*u - 4.0)*exp(-u*u*B*pow(cos(theta), 2)) + 2.0*cos(theta)*sqrt(pi)*u*(erf(u*sqrt(B)*cos(theta))-1.0)*((R*R*w*w - u*u)*pow(B, 1.5) - 2.5*sqrt(B));
-
-    auto B_hn = -num/den;*/
-
-    const auto num = 4.0*B*(exp(-u*u*B*pow(cos(theta), 2)) + u*cos(theta)*sqrt(pi*B)*erf(u*sqrt(B)*cos(theta)));
-
-    const auto den = (2.0*w*w*R*R*B - 2.0*B*u*u - 4.0)*exp(-u*u*B*pow(cos(theta), 2)) + 2.0*cos(theta)*sqrt(pi)*u*erf(u*sqrt(B)*cos(theta))*((R*R*w*w - u*u)*pow(B, 1.5) - 2.5*sqrt(B));
-
-    auto B_hn = -num/den;
-
-    const auto n_h = n*sqrt(B_hn/B)*(exp(-u*u*B*pow(cos(theta), 2)) + sqrt(pi*B)*u*cos(theta)*(erf(sqrt(B)*cos(theta)*u)-1.0));
-
-    const auto f = n_h*pow(B_hn/pi, 1.5)*exp(-B_hn*(pow(x, 2.0) + pow(y-w*R, 2.0) + pow(z, 2.0)));
+    const auto f = n_h*pow(B_h/pi, 1.5)*exp(-B_h*(pow(x, 2.0) + pow(y-w*R, 2.0) + pow(z, 2.0)));
 
     const auto P = m*a*x*x*f;
     const auto T = m*a*x*y*f;
@@ -163,7 +151,7 @@ int main(){
             << "\n";
 
   // number of integration segments
-  const double N = 100;
+  const double N = 200;
 
   // integration range
   const double infty = 2000;
@@ -171,14 +159,29 @@ int main(){
   // properties
   const double R   = 1.0;
   const double rho = 1.7838;
-  const double u   = 300.0;
+  const double S    = 0.5;
   const double w   = 0.0;
   const double p   = 101325.0;
   const double T_h = 273.15;
   const double m   = 6.6335209e-26;
 
   const double B   = rho/(2.0*p);
-  const double B_h = rho/(2.0*p);
+
+  const auto u = S/sqrt(B);
+
+  // equilibrium
+  const auto Bheq = [=](){
+    const auto A = u*sqrt(B);
+    const auto I0 = boost::math::cyl_bessel_i(0, -A*A*0.5);
+    const auto I2 = boost::math::cyl_bessel_i(2, -A*A*0.5);
+
+    const auto num = 4.0*B*(A*u*(I0-I2)*sqrt(B) + I0);
+    const auto den = 2.0*A*u*(R*w-u)*(R*w+u)*(I0-I2)*pow(B, 1.5)
+                      -5.0*A*u*(I0-I2)*sqrt(B)+2.0*I0*(B*R*R*w*w-B*u*u-2);
+    return -num/den;
+  };
+
+  const auto B_h = Bheq();
 
   const double n = rho/m;
   const double a = 1.0;
